@@ -36,13 +36,6 @@ frc2::Command* RobotContainer::GetEmptyCommand() {
            }, {});
 }
 
-frc2::CommandPtr RobotContainer::SetMultijoint(units::length::meter_t cascadeHeight, units::angle::degree_t algaeAngle) {
-  return frc2::cmd::Parallel(
-    cascade.GetMoveCommand(cascadeHeight),
-    algae.GetMoveCommand(algaeAngle)
-  );
-}
-
 RobotContainer::RobotContainer() {
   // Autonomous selector configuration
   autonChooser.SetDefaultOption("None", "None");
@@ -65,45 +58,46 @@ RobotContainer::RobotContainer() {
   // controller.Start().OnTrue(std::move(rumblePrimaryOn));
   // controller.Start().OnFalse(std::move(rumblePrimaryOff));
 
-  controller.Start().OnTrue(SetMultijoint(0.0_m, 80_deg));
+  // controller.Start().OnTrue(SetMultijoint(0.0_m, 80_deg));
 
   /*controller.Back().OnTrue(cascade.GetMoveCommand(0.2475_m));*/
 
-  mainBack.OnTrue(frc2::cmd::Either(
+/*   mainBack.OnTrue(frc2::cmd::Either(
         SetMultijoint(0.0_m, -45_deg),
         SetMultijoint(0.07_m, 80_deg),
         [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
-  ));
+   ));*/
 
   // Level 1
   /*mainDpadDown.OnTrue(cascade.GetMoveCommand(0.435_m)); */
-  mainDpadDown.OnTrue(frc2::cmd::Either(
+/*   mainDpadDown.OnTrue(frc2::cmd::Either(
         SetMultijoint(0.0_m, -15.0_deg),
         SetMultijoint(0.15_m, 80_deg),
         [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
-  ));
+   ));*/
 
   // Level 2
   /*mainDpadRight.OnTrue(cascade.GetMoveCommand(0.623_m)); */
-  mainDpadRight.OnTrue(frc2::cmd::Either(
+/*   mainDpadRight.OnTrue(frc2::cmd::Either(
         SetMultijoint(0.38_m, 0_deg),
         SetMultijoint(0.38_m, 80_deg),
         [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
-  ));
+   ));/
   // Level 3
   /*mainDpadLeft.OnTrue(cascade.GetMoveCommand(0.998_m)); */
-  mainDpadLeft.OnTrue(frc2::cmd::Either(
+/*   mainDpadLeft.OnTrue(frc2::cmd::Either(
         SetMultijoint(0.76_m, 0_deg),
         SetMultijoint(0.76_m, 80_deg),
         [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
-  ));
+
+   ));*/
   // Level 4
   /*mainDpadUp.OnTrue(cascade.GetMoveCommand(1.47_m));*/
-  mainDpadUp.OnTrue(frc2::cmd::Either(
-        SetMultijoint(1.3_m, 60.0_deg),
-        SetMultijoint(1.3_m, 80.0_deg),
-        [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
-  ));
+  //  mainDpadUp.OnTrue(frc2::cmd::Either(
+  //       SetMultijoint(1.3_m, 60.0_deg),
+  //       SetMultijoint(1.3_m, 80.0_deg),
+  //       [&]() { return TrackingTarget == GlobalConstants::kAlgaeMode; }
+  //  ));
   
   // Change global target to coral
   controller.LeftBumper().OnTrue(std::move(targetCoral)); 
@@ -113,10 +107,27 @@ RobotContainer::RobotContainer() {
   // Change global target to algae 
   controller.RightBumper().OnTrue(std::move(targetAlgae)); 
 
-  //Command toggle for field centric
-  controller.Y().OnTrue(std::move(toggleFieldCentric));
   
+
+  //Command toggle for field centric
+  
+  
+
   /*******Subsystem DEFAULT Commands*******/
+
+  controller.Y().OnTrue(std::move(toggleFieldCentric));
+
+  controller.Back().OnTrue(SetAllKinematics(CoralLoad));
+  controller.Start().OnTrue(SetAllKinematics(startingPose));
+  mainDpadDown.OnTrue(SetAllKinematics(L1Pose));  
+  mainDpadRight.OnTrue(SetAllKinematics(L2Pose));  
+  mainDpadLeft.OnTrue(SetAllKinematics(L3Pose));  
+  mainDpadUp.OnTrue(SetAllKinematics(L4Pose));
+
+  controller.A().OnTrue(SetAllKinematics(L2AlgaeDescore));  
+  controller.B().OnTrue(SetAllKinematics(L3AlgaeDescore));
+
+
   m_drive.SetDefaultCommand(frc2::cmd::Run(
     [this] {
       SmartDashboard::PutNumber("Subsystem Target", TrackingTarget);
@@ -141,29 +152,55 @@ RobotContainer::RobotContainer() {
       float turn = 0.95 * pow(turnX, 3) + (1 - 0.95) * turnX;
       // pass filtered inputs to Drive function
       // inputs will be between -1.0 to 1.0, multiply by intended speed range in mps/deg_per_s when passing
-      m_drive.Drive({xSpeed * DriveConstants::kDriveTranslationLimit, ySpeed * DriveConstants::kDriveTranslationLimit, 
-      turn * -270.0_deg_per_s}, true, fieldCentric);
+      double cascadeAdjust = 1.0 - (cascade.GetPosition() - CascadeConstants::kStartPosition).value() / 1.2;
+      if(cascadeAdjust > 1.0) cascadeAdjust = 1.0;
+      if(cascadeAdjust < 0.15) cascadeAdjust = 0.15;
+      m_drive.Drive({
+        xSpeed * DriveConstants::kDriveTranslationLimit * cascadeAdjust, 
+        ySpeed * DriveConstants::kDriveTranslationLimit * cascadeAdjust, 
+        turn * -270.0_deg_per_s}, true, fieldCentric);
+      SmartDashboard::PutData(std::move(&autonChooser));  // send auton selector to Shuffleboard
+
     }, {&m_drive}));
 
-  intake.SetDefaultCommand(frc2::cmd::Run(
+/*   intake.SetDefaultCommand(frc2::cmd::Run(
     [this] {
       if(TrackingTarget == GlobalConstants::kCoralMode || TrackingTarget == GlobalConstants::kArbitrary){
         double power = controller.GetLeftTriggerAxis() - controller.GetRightTriggerAxis();
         if(fabs(power) < 0.1) power = 0.0;
         intake.SetPower(power);
+
+
+
       }
     },
-  {&intake}));
+  {&intake})); */
 
   algae.SetDefaultCommand(frc2::cmd::Run(
     [this] {
       if(TrackingTarget == GlobalConstants::kAlgaeMode || TrackingTarget == GlobalConstants::kArbitrary) {
-        double power = controller.GetLeftTriggerAxis() - controller.GetRightTriggerAxis();
+        double power = controller.GetLeftTriggerAxis() - (controller.GetRightTriggerAxis()/2);
         if(fabs(power) < 0.1) power = 0.0;
         algae.SetIntakePower(power);
       }
+      else {
+        algae.SetIntakePower(0.0);
+      }
     }, 
-  {&algae}));
+  {&algae})); 
+
+  coral.SetDefaultCommand(frc2::cmd::Run(
+    [this] {
+      if(TrackingTarget == GlobalConstants::kCoralMode || TrackingTarget == GlobalConstants::kArbitrary) {
+        double power = (controller.GetLeftTriggerAxis()/2.5) - controller.GetRightTriggerAxis();
+        if(fabs(power) < 0.1) power = 0.0;
+        coral.SetIntakePower(power);
+      }
+      else {
+        coral.SetIntakePower(0.0);
+      }
+    }, 
+  {&coral}));
 
   // climb.SetDefaultCommand(frc2::cmd::Run(
   //   [this] {
@@ -177,21 +214,26 @@ RobotContainer::RobotContainer() {
   //   },  
   // {&funnel}));
 
-  led.SetDefaultCommand(frc2::cmd::Run(
+ /*  led.SetDefaultCommand(frc2::cmd::Run(
     [this] {
     
     },
-  {&led}));
+  {&led})); */
 
 }
 
-frc2::CommandPtr RobotContainer::SetAllKinematics(RobotContainer::KinematicsPoses kinInfoRef) {
+frc2::CommandPtr RobotContainer::SetAllKinematics(RobotContainer::KinematicsPose pose) {
   return frc2::cmd::Sequence(
     frc2::cmd::RunOnce(
-      [&]() {
-        cascade.SetTargetPosition(kinInfoRef.cascadePose);
+      [this, pose]() {
+        cascade.SetTargetPosition(pose.cascadePose);
         // Add other subsystems
-      }, {&cascade})
+      }, {&cascade}),
+    frc2::cmd::RunOnce(
+      [this, pose]() {
+        coral.SetTargetAngle(pose.coralAngle);
+        // Add other subsystems
+      }, {&coral})
   );
 }
 

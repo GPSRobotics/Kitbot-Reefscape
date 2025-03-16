@@ -18,12 +18,12 @@ using namespace frc;
 using namespace rev;
 using namespace pathplanner;
 
-DriveSubsystem::DriveSubsystem(JetsonSubsystem *jetRef, int *targetRef)
+DriveSubsystem::DriveSubsystem(int *targetRef)
       //Wheel motors
-    : backLeft{kBackLeftPort, "canCan"},
-      frontLeft{kFrontLeftPort, "canCan"},
-      backRight{kBackRightPort, "canCan"},
-      frontRight{kFrontRightPort, "canCan"},
+    : backLeft{kBackLeftPort},
+      frontLeft{kFrontLeftPort},
+      backRight{kBackRightPort},
+      frontRight{kFrontRightPort},
 
       //Degree of wheel motors
       backLeftTheta{kBackLeftThetaPort, SparkLowLevel::MotorType::kBrushed},
@@ -40,11 +40,11 @@ DriveSubsystem::DriveSubsystem(JetsonSubsystem *jetRef, int *targetRef)
       //Swerve group motors
       s_backLeft{&backLeft, &backLeftTheta, &blEncoder, kBLeftMagPos},
       s_frontLeft{&frontLeft, &frontLeftTheta, &flEncoder, kFLeftMagPos},
-      s_backRight{&backRight, &backRightTheta, &blEncoder, kBRightMagPos},
+      s_backRight{&backRight, &backRightTheta, &brEncoder, kBRightMagPos},
       s_frontRight{&frontRight, &frontRightTheta, &frEncoder, kFRightMagPos},
 
       //Gryo
-      gyro{0, "canCan"},
+      gyro{0},
 
       //Odometry
       odometry{kDriveKinematics, {GetRotation()}, {s_frontLeft.GetPosition(), s_frontRight.GetPosition(), s_backLeft.GetPosition(),
@@ -54,7 +54,6 @@ DriveSubsystem::DriveSubsystem(JetsonSubsystem *jetRef, int *targetRef)
       yAccel{kDriveAccelerationLimit},
       xDecel{kDriveDecelerationLimit},
       yDecel{kDriveDecelerationLimit} {
-        jetson = jetRef;
         thetaTarget = targetRef;
 
         ConfigDriveMotors();
@@ -63,22 +62,22 @@ DriveSubsystem::DriveSubsystem(JetsonSubsystem *jetRef, int *targetRef)
         SmartDashboard::PutNumber("offP", kPVelTurnOffset);
         SmartDashboard::PutNumber("offD", kPVelDistOffset);
         SmartDashboard::PutNumber("turnP", kTxAdjust);
-
+        
         // Configure the AutoBuilder last
         ConfigAutonController();
       }
 
 void DriveSubsystem::Periodic() {
   // Encoder Vals
-  // SmartDashboard::PutNumber("BL Abs", backLeftEncoder.Get());
-  // SmartDashboard::PutNumber("FL Abs", frontLeftEncoder.Get());
-  // SmartDashboard::PutNumber("BR Abs", backRightEncoder.Get());
-  // SmartDashboard::PutNumber("FR Abs", frontRightEncoder.Get());
+  SmartDashboard::PutNumber("BL Abs", blEncoder.Get());
+  SmartDashboard::PutNumber("FL Abs", flEncoder.Get());
+  SmartDashboard::PutNumber("BR Abs", brEncoder.Get());
+  SmartDashboard::PutNumber("FR Abs", frEncoder.Get());
 
-  // SmartDashboard::PutNumber("BL Pos", (double)s_backLeft.GetTurnEncoderAngle());
-  // SmartDashboard::PutNumber("FL Pos", (double)s_frontLeft.GetTurnEncoderAngle());
-  // SmartDashboard::PutNumber("BR Pos", (double)s_backRight.GetTurnEncoderAngle());
-  // SmartDashboard::PutNumber("FR Pos", (double)s_frontRight.GetTurnEncoderAngle());
+  SmartDashboard::PutNumber("BL Pos", (double)s_backLeft.GetTurnEncoderAngle());
+  SmartDashboard::PutNumber("FL Pos", (double)s_frontLeft.GetTurnEncoderAngle());
+  SmartDashboard::PutNumber("BR Pos", (double)s_backRight.GetTurnEncoderAngle());
+  SmartDashboard::PutNumber("FR Pos", (double)s_frontRight.GetTurnEncoderAngle());
 
   // SetThetaToHold({units::angle::degree_t{SmartDashboard::GetNumber("Theta Target", 0.0)}});
    s_frontLeft.RunPID();
@@ -112,6 +111,8 @@ void DriveSubsystem::Drive(frc::ChassisSpeeds speeds,
   units::meters_per_second_t x = speeds.vx;
   units::meters_per_second_t y = speeds.vy;
   units::angular_velocity::radians_per_second_t rot = speeds.omega;
+  SmartDashboard::PutNumber("X Drive Speed", x.value());
+  SmartDashboard::PutNumber("X Drive Speed", y.value());
   if(omegaOverride) {
     double angle = GetPose().Rotation().Degrees().value();
     double target = SwerveModule::PlaceInAppropriate0To360Scope(thetaHoldController.GetSetpoint(), angle);
@@ -277,10 +278,10 @@ frc::Pose2d DriveSubsystem::GetPoseToHold() {
 }
 
 void DriveSubsystem::ResetFromJetson() {
-  auto updatedPose = jetson->AverageRobotPose();
+  /* auto updatedPose = jetson->AverageRobotPose();
   if(!jetson->IsPoseAvailable()) return;
   auto rot = odometry.GetPose().Rotation();
-  ResetOdometry({updatedPose.Translation(), rot});
+  ResetOdometry({updatedPose.Translation(), rot}); */
 }
 
 void DriveSubsystem::SetThetaToHold(frc::Rotation2d target) {
@@ -331,6 +332,7 @@ void DriveSubsystem::ConfigDriveMotors() {
   backLeft.GetConfigurator().Apply(driveConfig);
   frontLeft.GetConfigurator().Apply(driveConfig);
   backRight.GetConfigurator().Apply(driveConfig);
+  // driveConfig.MotorOutput.Inverted = signals::InvertedValue::CounterClockwise_Positive;
   frontRight.GetConfigurator().Apply(driveConfig);
 }
 

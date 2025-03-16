@@ -30,7 +30,9 @@ double SwerveModule::GetFalconTurnPosition() const {
 
 double SwerveModule::GetNeoTurnPosition() const {
     double angle = turnEncoderOffset - neoEncoder->Get();
-    return angle * DriveConstants::kTurnEncoderDegreesPerPulse;
+    if(angle < 0.0) angle = 1.0 - angle;
+    angle = fabs(1.0 - angle);
+    return (angle * DriveConstants::kTurnEncoderDegreesPerPulse) - 180.0;
 }
 
 void SwerveModule::SetFalconTurnPower(double power) {
@@ -104,13 +106,14 @@ double SwerveModule::PlaceInAppropriate0To360Scope(double scopeReference, double
 void SwerveModule::SetDesiredState(
     const frc::SwerveModuleState& referenceState) {
 
+        // frc::SmartDashboard::PutNumber("FL UNOPTIMIZED Target", (double)referenceState.angle.Degrees());
     // Optimize the reference state to avoid spinning further than 90 degrees*
     const auto state = Optimize(referenceState, {GetTurnEncoderAngle()});
     
     if(usingFalcon) {
         falconTurn->SetControl(rotation.WithPosition(units::angle::turn_t{(double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse}));
     } else {
-        // frc::SmartDashboard::PutNumber("BL Target", (double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse);
+        // frc::SmartDashboard::PutNumber("FL Target", (double)state.angle.Degrees());
         // frc::SmartDashboard::PutNumber("Target", (double)referenceState.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse);
         // std::cout << "Neo Target: " << (double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse << '\n';
         // neoController->SetReference((double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse, SparkMax::ControlType::kPosition);
@@ -125,13 +128,15 @@ void SwerveModule::SetDesiredState(
 }
 
 void SwerveModule::RunPID() {
+    neoTurn->SetInverted(true);
     double angle = (double)GetTurnEncoderAngle();
-    double power = neoController.Calculate(angle);
+    double power = neoController.Calculate(PlaceInAppropriate0To360Scope(neoController.GetSetpoint(), angle));
     // frc::SmartDashboard::PutNumber("FL Angle", angle);
     // frc::SmartDashboard::PutNumber("FL Power", power);
 
     neoTurn->Set(power);
 }
+
 
 // debug
 void SwerveModule::SetDrivePower(double power) {

@@ -32,16 +32,16 @@ namespace DriveConstants {
     constexpr int kBackRightEncoderPort = 2;
     constexpr int kFrontRightEncoderPort = 3;
     
-    constexpr double kBLeftMagPos = 0.109619140625;
-    constexpr double kFLeftMagPos = 0.37060546875;
-    constexpr double kBRightMagPos = 0.39404296875;
-    constexpr double kFRightMagPos = 0.250244140625;
+    constexpr double kBLeftMagPos = 0.220534655513366;
+    constexpr double kFLeftMagPos = 0.24972238124306;
+    constexpr double kBRightMagPos = 0.020010375500259;
+    constexpr double kFRightMagPos = 0.997154824928871 - 0.50;
     
     // info for odometry
     constexpr int kEncoderResolution = 4096;
     constexpr auto kDriveBaseRadius = 0.319786_m;
-    constexpr double kWheelRadius = .0508;
-    constexpr double kDriveRatio = 1 / 4.125;
+    constexpr double kWheelRadius = 0.0381;
+    constexpr double kDriveRatio = 1 / 4.13;
     constexpr double kTurnRatio = 1 / 10.29;
     constexpr double kDriveDistancePerRev = (2 * std::numbers::pi * kWheelRadius) * kDriveRatio;
     // constexpr double kDriveEncoderDistancePerPulse = (2 * std::numbers::pi * kWheelRadius / (double)kEncoderResolution) * kDriveRatio;
@@ -52,7 +52,7 @@ namespace DriveConstants {
     constexpr int kArbitrary = 0;
 
     // TalonFX config
-    constexpr double kDriveP = 0.2402345985174179;
+    constexpr double kDriveP = 0.08;
     constexpr double kDriveV = 0.1345313787460327;
     constexpr units::time::second_t kDriveRamp = 0.0_s;
     constexpr units::current::ampere_t kDriveCurrentLimit = 30.0_A;
@@ -66,8 +66,8 @@ namespace DriveConstants {
     constexpr double kTurnDeadzone = 0.1;
     constexpr double kDriveCurveExtent = 0.6;
     constexpr auto kDriveAccelerationLimit = 9.0_mps_sq;
-    constexpr auto kDriveDecelerationLimit = 25.0_mps_sq;
-    constexpr auto kDriveTranslationLimit = 7.7_mps;
+    constexpr auto kDriveDecelerationLimit = 7.0_mps_sq;
+    constexpr auto kDriveTranslationLimit = 3.3_mps;
     constexpr double kTxAdjust = 0.5;
     constexpr double kAlignP = 0.5;
     constexpr double kPVelTurnOffset = -2.0;
