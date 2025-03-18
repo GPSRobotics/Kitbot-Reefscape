@@ -121,7 +121,7 @@ void SwerveModule::SetDesiredState(
         // neoController->SetReference((double)referenceState.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse, SparkMax::ControlType::kPosition);
         // neoController.SetSetpoint((double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse);
         neoController.SetSetpoint((double)state.angle.Degrees());
-        // frc::SmartDashboard::PutNumber("FL Target", neoController.GetSetpoint());
+        frc::SmartDashboard::PutNumber("BR Target", neoController.GetSetpoint());
     }
 
     driveMotor->SetControl(velocity.WithVelocity(
@@ -131,9 +131,10 @@ void SwerveModule::SetDesiredState(
 void SwerveModule::RunPID() {
     neoTurn->SetInverted(true);
     double angle = (double)GetTurnEncoderAngle();
-    double power = neoController.Calculate(PlaceInAppropriate0To360Scope(neoController.GetSetpoint(), angle));
-    // frc::SmartDashboard::PutNumber("FL Angle", angle);
-    // frc::SmartDashboard::PutNumber("FL Power", power);
+    angle = PlaceInAppropriate0To360Scope(neoController.GetSetpoint(), angle);
+    double power = neoController.Calculate(angle);
+    frc::SmartDashboard::PutNumber("BR Angle", angle);
+    frc::SmartDashboard::PutNumber("BR Power", power);
 
     neoTurn->Set(power);
 }

@@ -57,6 +57,10 @@ DriveSubsystem::DriveSubsystem(int *targetRef)
         thetaTarget = targetRef;
 
         ConfigDriveMotors();
+        backLeftTheta.SetInverted(false);
+        frontLeftTheta.SetInverted(false);
+        backRightTheta.SetInverted(false);
+        frontRightTheta.SetInverted(false);
 
         SmartDashboard::PutBoolean("Limelight Targeting", targetUsingLimelight);
         SmartDashboard::PutNumber("offP", kPVelTurnOffset);
@@ -161,7 +165,7 @@ void DriveSubsystem::SetModuleStates(
   // SmartDashboard::PutNumber("BL Target Angle", (double)desiredStates[2].angle.Degrees());
     s_backLeft.SetDesiredState(desiredStates[2]);
   // SmartDashboard::PutNumber("BR Target Angle", (double)desiredStates[2].angle.Degrees());
-    s_backRight.SetDesiredState(desiredStates[3]);
+     s_backRight.SetDesiredState(desiredStates[3]);
 }
 
 wpi::array<SwerveModuleState, 4> DriveSubsystem::GetModuleStates() const {
