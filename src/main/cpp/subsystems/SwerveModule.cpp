@@ -30,10 +30,16 @@ double SwerveModule::GetFalconTurnPosition() const {
 }
 
 double SwerveModule::GetNeoTurnPosition() const {
-    double angle = turnEncoderOffset - neoEncoder->Get();
-    if(angle < 0.0) angle = 1.0 - angle;
-    angle = fabs(1.0 - angle);
-    return (angle * DriveConstants::kTurnEncoderDegreesPerPulse) - 180.0;
+    //Get raw encoder value (0-1 range)
+   double raw = neoEncoder->Get();
+     
+     // Apply offset and wrap within [0, 1) range
+     double adjusted = std::fmod(raw - turnEncoderOffset + 1.0, 1.0);
+     
+     // Convert to degrees (-180 to 180 range)
+     double angle = (adjusted * DriveConstants::kTurnEncoderDegreesPerPulse) - 180.0;
+     
+     return angle;
 }
 
 void SwerveModule::SetFalconTurnPower(double power) {
