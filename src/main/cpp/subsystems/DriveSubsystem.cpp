@@ -38,10 +38,10 @@ DriveSubsystem::DriveSubsystem(int *targetRef)
       frEncoder{kFrontRightEncoderPort},
 
       //Swerve group motors
-      s_backLeft{&backLeft, &backLeftTheta, &blEncoder, kBLeftMagPos},
-      s_frontLeft{&frontLeft, &frontLeftTheta, &flEncoder, kFLeftMagPos},
-      s_backRight{&backRight, &backRightTheta, &brEncoder, kBRightMagPos},
-      s_frontRight{&frontRight, &frontRightTheta, &frEncoder, kFRightMagPos},
+      s_backLeft{&backLeft, &backLeftTheta, &blEncoder, kBLeftMagPos, 0.002},
+      s_frontLeft{&frontLeft, &frontLeftTheta, &flEncoder, kFLeftMagPos, 0.002},
+      s_backRight{&backRight, &backRightTheta, &brEncoder, kBRightMagPos, 0.002},
+      s_frontRight{&frontRight, &frontRightTheta, &frEncoder, kFRightMagPos, 1.0},
 
       //Gryo
       gyro{0},
@@ -84,6 +84,7 @@ void DriveSubsystem::Periodic() {
    s_frontRight.RunPID();
    s_backLeft.RunPID();
    s_backRight.RunPID();
+  //  s_backRight.SetTurnPower(1.0);
 
    SmartDashboard::PutBoolean("Omega Override State", omegaOverride);
   targetUsingLimelight = SmartDashboard::GetBoolean("Limelight Targeting", targetUsingLimelight);

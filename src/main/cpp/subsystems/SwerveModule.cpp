@@ -16,12 +16,13 @@ SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor,
 }
 
 SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor, SparkMax *turningMotor, 
-        DutyCycleEncoder *thetaEncoder, double thetaEncoderOffset) {
+        DutyCycleEncoder *thetaEncoder, double thetaEncoderOffset, double neoControllerkP) {
     usingFalcon = false;
     driveMotor = drivingMotor;
     neoTurn = turningMotor;
     neoEncoder = thetaEncoder;
     turnEncoderOffset = thetaEncoderOffset;
+    neoController.SetP(neoControllerkP);
 }
 
 double SwerveModule::GetFalconTurnPosition() const {

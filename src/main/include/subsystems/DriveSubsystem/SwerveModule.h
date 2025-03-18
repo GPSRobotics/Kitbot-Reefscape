@@ -31,7 +31,7 @@ class SwerveModule {
         SwerveModule(hardware::TalonFX *drivingMotor, hardware::TalonFX *turningMotor);
         
         SwerveModule(hardware::TalonFX *drivingMotor, SparkMax *turningMotor, 
-        DutyCycleEncoder *thetaEncoder, double thetaEncoderOffset = 0);
+        DutyCycleEncoder *thetaEncoder, double thetaEncoderOffset = 0, double neoControllerkP = 0.002);
         /**
          * Gets the distance of the drive encoder.
          *
@@ -117,5 +117,5 @@ class SwerveModule {
         // Only for DutyCycle
         double turnEncoderOffset = 0.0;
         // frc2::PIDController neoController{0.005, 0.0, 0.0}; off floor
-        frc::PIDController neoController{0.008, 0.0, 0.0};
+        frc::PIDController neoController{0.002, 0.0, 0.0};
 };

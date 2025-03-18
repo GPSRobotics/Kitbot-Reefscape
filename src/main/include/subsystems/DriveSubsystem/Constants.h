@@ -24,13 +24,13 @@ namespace DriveConstants {
     //Degree of wheel motors
     constexpr int kBackLeftThetaPort = 4;
     constexpr int kFrontLeftThetaPort = 5;
-    constexpr int kBackRightThetaPort = 6;
+    constexpr int kBackRightThetaPort = 8;
     constexpr int kFrontRightThetaPort = 7;
 
-    constexpr int kBackLeftEncoderPort = 0;
-    constexpr int kFrontLeftEncoderPort = 1;
-    constexpr int kBackRightEncoderPort = 2;
-    constexpr int kFrontRightEncoderPort = 3;
+    constexpr int kBackLeftEncoderPort = 3;
+    constexpr int kFrontLeftEncoderPort = 2;
+    constexpr int kBackRightEncoderPort = 1;
+    constexpr int kFrontRightEncoderPort = 0;
     
     constexpr double kBLeftMagPos = 0.220534655513366;
     constexpr double kFLeftMagPos = 0.24972238124306;

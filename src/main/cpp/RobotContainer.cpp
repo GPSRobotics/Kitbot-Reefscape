@@ -117,15 +117,15 @@ RobotContainer::RobotContainer() {
 
   controller.Y().OnTrue(std::move(toggleFieldCentric));
 
-  controller.Back().OnTrue(SetAllKinematics(CoralLoad));
-  controller.Start().OnTrue(SetAllKinematics(startingPose));
-  mainDpadDown.OnTrue(SetAllKinematics(L1Pose));  
-  mainDpadRight.OnTrue(SetAllKinematics(L2Pose));  
-  mainDpadLeft.OnTrue(SetAllKinematics(L3Pose));  
-  mainDpadUp.OnTrue(SetAllKinematics(L4Pose));
+  // controller.Back().OnTrue(SetAllKinematics(CoralLoad));
+  // controller.Start().OnTrue(SetAllKinematics(startingPose));
+  // mainDpadDown.OnTrue(SetAllKinematics(L1Pose));  
+  // mainDpadRight.OnTrue(SetAllKinematics(L2Pose));  
+  // mainDpadLeft.OnTrue(SetAllKinematics(L3Pose));  
+  // mainDpadUp.OnTrue(SetAllKinematics(L4Pose));
 
-  controller.A().OnTrue(SetAllKinematics(L2AlgaeDescore));  
-  controller.B().OnTrue(SetAllKinematics(L3AlgaeDescore));
+  // controller.A().OnTrue(SetAllKinematics(L2AlgaeDescore));  
+  // controller.B().OnTrue(SetAllKinematics(L3AlgaeDescore));
 
 
   m_drive.SetDefaultCommand(frc2::cmd::Run(
@@ -152,12 +152,12 @@ RobotContainer::RobotContainer() {
       float turn = 0.95 * pow(turnX, 3) + (1 - 0.95) * turnX;
       // pass filtered inputs to Drive function
       // inputs will be between -1.0 to 1.0, multiply by intended speed range in mps/deg_per_s when passing
-      double cascadeAdjust = 1.0 - (cascade.GetPosition() - CascadeConstants::kStartPosition).value() / 1.2;
-      if(cascadeAdjust > 1.0) cascadeAdjust = 1.0;
-      if(cascadeAdjust < 0.15) cascadeAdjust = 0.15;
+      // double cascadeAdjust = 1.0 - (cascade.GetPosition() - CascadeConstants::kStartPosition).value() / 1.2;
+      // if(cascadeAdjust > 1.0) cascadeAdjust = 1.0;
+      // if(cascadeAdjust < 0.15) cascadeAdjust = 0.15;
       m_drive.Drive({
-        xSpeed * DriveConstants::kDriveTranslationLimit * cascadeAdjust, 
-        ySpeed * DriveConstants::kDriveTranslationLimit * cascadeAdjust, 
+        xSpeed * DriveConstants::kDriveTranslationLimit, 
+        ySpeed * DriveConstants::kDriveTranslationLimit, 
         turn * -270.0_deg_per_s}, true, fieldCentric);
       SmartDashboard::PutData(std::move(&autonChooser));  // send auton selector to Shuffleboard
 
@@ -176,31 +176,31 @@ RobotContainer::RobotContainer() {
     },
   {&intake})); */
 
-  algae.SetDefaultCommand(frc2::cmd::Run(
-    [this] {
-      if(TrackingTarget == GlobalConstants::kAlgaeMode || TrackingTarget == GlobalConstants::kArbitrary) {
-        double power = controller.GetLeftTriggerAxis() - (controller.GetRightTriggerAxis()/2);
-        if(fabs(power) < 0.1) power = 0.0;
-        algae.SetIntakePower(power);
-      }
-      else {
-        algae.SetIntakePower(0.0);
-      }
-    }, 
-  {&algae})); 
+  // algae.SetDefaultCommand(frc2::cmd::Run(
+  //   [this] {
+  //     if(TrackingTarget == GlobalConstants::kAlgaeMode || TrackingTarget == GlobalConstants::kArbitrary) {
+  //       double power = controller.GetLeftTriggerAxis() - (controller.GetRightTriggerAxis()/2);
+  //       if(fabs(power) < 0.1) power = 0.0;
+  //       algae.SetIntakePower(power);
+  //     }
+  //     else {
+  //       algae.SetIntakePower(0.0);
+  //     }
+  //   }, 
+  // {&algae})); 
 
-  coral.SetDefaultCommand(frc2::cmd::Run(
-    [this] {
-      if(TrackingTarget == GlobalConstants::kCoralMode || TrackingTarget == GlobalConstants::kArbitrary) {
-        double power = (controller.GetLeftTriggerAxis()/2.5) - controller.GetRightTriggerAxis();
-        if(fabs(power) < 0.1) power = 0.0;
-        coral.SetIntakePower(power);
-      }
-      else {
-        coral.SetIntakePower(0.0);
-      }
-    }, 
-  {&coral}));
+  // coral.SetDefaultCommand(frc2::cmd::Run(
+  //   [this] {
+  //     if(TrackingTarget == GlobalConstants::kCoralMode || TrackingTarget == GlobalConstants::kArbitrary) {
+  //       double power = (controller.GetLeftTriggerAxis()/2.5) - controller.GetRightTriggerAxis();
+  //       if(fabs(power) < 0.1) power = 0.0;
+  //       coral.SetIntakePower(power);
+  //     }
+  //     else {
+  //       coral.SetIntakePower(0.0);
+  //     }
+  //   }, 
+  // {&coral}));
 
   // climb.SetDefaultCommand(frc2::cmd::Run(
   //   [this] {
@@ -222,20 +222,20 @@ RobotContainer::RobotContainer() {
 
 }
 
-frc2::CommandPtr RobotContainer::SetAllKinematics(RobotContainer::KinematicsPose pose) {
-  return frc2::cmd::Sequence(
-    frc2::cmd::RunOnce(
-      [this, pose]() {
-        cascade.SetTargetPosition(pose.cascadePose);
-        // Add other subsystems
-      }, {&cascade}),
-    frc2::cmd::RunOnce(
-      [this, pose]() {
-        coral.SetTargetAngle(pose.coralAngle);
-        // Add other subsystems
-      }, {&coral})
-  );
-}
+// frc2::CommandPtr RobotContainer::SetAllKinematics(RobotContainer::KinematicsPose pose) {
+//   return frc2::cmd::Sequence(
+//     frc2::cmd::RunOnce(
+//       [this, pose]() {
+//         cascade.SetTargetPosition(pose.cascadePose);
+//         // Add other subsystems
+//       }, {&cascade}),
+//     frc2::cmd::RunOnce(
+//       [this, pose]() {
+//         coral.SetTargetAngle(pose.coralAngle);
+//         // Add other subsystems
+//       }, {&coral})
+//   );
+// }
 
 void RobotContainer::SetDriveBrakes(bool state) {
   m_drive.SetBrakeMode(state);
