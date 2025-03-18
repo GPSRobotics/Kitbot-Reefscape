@@ -9,11 +9,12 @@
 
 #include <frc/geometry/Rotation2d.h>
 
-SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor,
+//might wanna delete
+/*SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor,
                             hardware::TalonFX *turningMotor) {
     driveMotor = drivingMotor;
     falconTurn = turningMotor;
-}
+}*/
 
 SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor, SparkMax *turningMotor, 
         DutyCycleEncoder *thetaEncoder, double thetaEncoderOffset) {
@@ -24,9 +25,9 @@ SwerveModule::SwerveModule(hardware::TalonFX *drivingMotor, SparkMax *turningMot
     turnEncoderOffset = thetaEncoderOffset;
 }
 
-double SwerveModule::GetFalconTurnPosition() const {
+/*double SwerveModule::GetFalconTurnPosition() const {
     return falconTurn->GetPosition().GetValueAsDouble() * 360.0;
-}
+}*/
 
 double SwerveModule::GetNeoTurnPosition() const {
     // Get raw encoder value (0-1 range)
@@ -41,9 +42,9 @@ double SwerveModule::GetNeoTurnPosition() const {
     return angle;
 }
 
-void SwerveModule::SetFalconTurnPower(double power) {
+/*void SwerveModule::SetFalconTurnPower(double power) {
     falconTurn->Set(power);
-}
+}*/
 
 void SwerveModule::SetNeoTurnPower(double power) {
     neoTurn->Set(power);
@@ -53,6 +54,7 @@ units::meter_t SwerveModule::GetDriveEncoderDistance() const {
     return units::meter_t{driveMotor->GetPosition().GetValueAsDouble() * DriveConstants::kDriveDistancePerRev};
 }
 
+//Delete {usingFalcon ?} As we dont have a Falcon and might be causing issues
 units::degree_t SwerveModule::GetTurnEncoderAngle() const {
     return units::degree_t{usingFalcon ? GetFalconTurnPosition() : GetNeoTurnPosition()};
 }
@@ -115,6 +117,8 @@ void SwerveModule::SetDesiredState(
     // Optimize the reference state to avoid spinning further than 90 degrees*
     const auto state = Optimize(referenceState, {GetTurnEncoderAngle()});
     
+
+    //Delete If(usingFalcon) as we are not using a Falcon and could be causing issues
     if(usingFalcon) {
         falconTurn->SetControl(rotation.WithPosition(units::angle::turn_t{(double)state.angle.Degrees() / DriveConstants::kTurnEncoderDegreesPerPulse}));
     } else {
@@ -146,12 +150,14 @@ void SwerveModule::SetDrivePower(double power) {
     driveMotor->Set(power);
 }
 
+//Delete if(usingFalcon) as we dont have a falcon and might be causing issues and not turning motor
 void SwerveModule::SetTurnPower(double power) {
     if(usingFalcon) SetFalconTurnPower(power);
     else SetNeoTurnPower(power);
     // turnMotor->Set(power);
 }
 
+//Only reseting the un used Falcon and not the neoEncoder fix pls
 void SwerveModule::ResetEncoders() {
     driveMotor->SetPosition(units::angle::turn_t{0.0});
     if(usingFalcon) falconTurn->SetPosition(units::angle::turn_t{0.0});
